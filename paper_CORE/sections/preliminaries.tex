@@ -1,0 +1,122 @@
+%!TEX root = ../main/main.tex
+
+\paragraph{Sets and intervals} Given a set $A$, we denote by $2^A$ the \textit{powerset} of $A$. We denote by $\bbN$ the natural numbers. Given $n,m \in \bbN$ with $n\leq m$, we denote by $[n]$ the set $\{1,...,n\}$ and by $[n..m]$ the interval $\{n, n+1, ..., m\}$ over $\bbN$. 
+We denote by $\mathbb{Q}_{\geq 0}$ the non-negative rational numbers, and by $\mathbb{Q}_{\geq 0}^\infty$ the set $\mathbb{Q}_{\geq 0} \cup \{\infty\}$ where $q < \infty$ for every $q \in \mathbb{Q}_{\geq 0}$.
+A subset $I \subseteq \mathbb{Q}_{\geq 0}$ is an \textit{interval over} $\mathbb{Q}_{\geq 0}$ if for every $p,q\in I$ and $r\in \mathbb{Q}_{\geq 0}$, if $p\leq r\leq q$, then $r\in I$.
+We will use the standard notation for specifying intervals over $\mathbb{Q}_{\geq 0}$, namely, as pairs in $\mathbb{Q}_{\geq 0}\times\mathbb{Q}_{\geq 0}^\infty$ with squared or circled brackets. 
+For example, $(\frac{1}{2},3] = \{p\in \mathbb{Q}_{\geq 0} \mid \frac{1}{2} < p \leq 3\}$, $(1,2) = \{p\in \mathbb{Q}_{\geq 0} \mid 1 < p < 2\}$ and $[7,\infty) = \{p\in \mathbb{Q}_{\geq 0} \mid 7 \leq p < \infty\}$ are intervals over $\mathbb{Q}_{\geq 0}$ under this notation.
+
+\paragraph{Events and streams} We fix a set \textbf{T} of \textit{event types}, a set \textbf{A} of \textit{attributes names}, and a set \textbf{D} of \textit{data values} (e.g., integers, floats, strings).
+An \textit{event} (or primitive event) $e$ is a partial mapping $e: \textbf{A} \rightarrow \textbf{D}$ that maps attributes names in \textbf{A} to data values in \textbf{D}.
+We denote att($e$) the domain of $e$, called the \textit{attributes of} $e$, and we assume that att($e$) is finite.
+We denote by $e(A)$ the data value of the attribute $A\in\textbf{A}$ whenever $A\in$ att($e$).
+Further, each event $e$ has a \textit{type} in \textbf{T} denoted by type($e$). 
+We define the \textit{size} $|e|$ of an event $e$ as the number of RAM registers to encode $e$.
+We write \textbf{E} to denote the \textit{set of all events} over event types \textbf{T}, attributes names \textbf{A}, and data values \textbf{D}.
+A \textit{stream} is an (arbitrary long) sequence $\bar{S} = e_1e_2...e_n$ of events where $|\bar{S}|=n$ is the length of the stream.
+
+\paragraph{Complex events} Fix a finite set \textbf{X} of \textit{variables} and assume that $\textbf{T} \subseteq \textbf{X}$, where \textbf{T} is the set of event types as defined earlier. Let $\bar{S}$ be a stream of length $n$.
+A \textit{complex event} of $\bar{S}$ is a triple $(i, j, \mu)$ where $i,j\in[n]$, $i\leq j$, and $\mu: \textbf{X} \rightarrow 2^{[i..j]}$ is a function with finite domain.
+Intuitively, $i$ and $j$ mark the beginning and end of the interval where the complex event happens, and $\mu$ stores the events in the interval $[i..j]$ that fired the complex event.
+In the following, we will usually use $C$ to denote a complex event $(i,j,\mu)$ of $\bar{S}$ and omit $\bar{S}$ if the stream is clear from the context.
+We will use interval($C$), start($C$) and end($C$) to denote the interval $[i..j]$, the start $i$ and the end $j$ of $C$, respectively. 
+Further, by some abuse of notation we will also use $C(X)$ for $X\in\textbf{X}$ to denote the set $\mu(X)$ of $C$.
+
+The following operations on complex events will be useful throughout the paper. We define the \textit{union} of complex events $C_1$ and $C_2$, denoted by $C_1\cup C_2$, as the complex event $C'$ such that start$(C')=$ min$\{\text{start}(C_1), \text{start}(C_2)\}$, end$(C')=$ max$\{\text{end}(C_1), \text{end}(C_2)\}$, and $C'(X)=C_1(X)\cup C_2(X)$ for every $X\in\textbf{X}$.
+Further, we define the \textit{projection over} $L$ of a complex event $C$, denoted by $\pi_L(C)$, as the complex event $C'$ such that interval$(C')=$ interval$(C)$ and $C'(X)=C(X)$ whenever $X\in L$, and $C'(X)=\emptyset$ otherwise. 
+Finally, we denote by $(i,j,\mu_\emptyset)$ the complex event with trivial mapping $\mu_\emptyset$ such that $\mu_\emptyset(X)=\emptyset$ for every $X\in\textbf{X}$.
+
+\paragraph{Predicates of events} A \textit{predicate} is a possibly infinite set $P$ of events. 
+For instance, $P$ could be the set of all $T$-events $e$ such that $e(temp) \leq 20^\circ$.
+In our examples, we will use the notation $A \sim a$ where $A\in\textbf{A}$ and $a\in\textbf{D}$ to denote the predicate $P = \{e \mid e(A)\sim a\}$ (e.g., $temp \leq 20^\circ$). 
+We say that an event $e$ satisfies predicate $P$, denoted $e\vDash P$, if, and only if, $e\in P$. 
+We generalize this notation from events to a set of events $E$ such that $E\vDash P$ if, and only if, $e\in P$ for every $e\in E$.
+
+We assume a fixed \textit{set of predicates} \textbf{P}. 
+Further, we assume that there is a basic set of predicates \textbf{P}$_\text{basic} \subseteq$ \textbf{P} (e.g., $temp \leq 20^\circ$) and \textbf{P} is the closure of \textbf{P}$_\text{basic}$ under intersection and negation (i.e., $P_1\cap P_2 \in \textbf{P}$ and \textbf{E}$\backslash P \in \textbf{P}$ for every $P, P_1, P_2 \in \textbf{P}$) where \textbf{E} is a predicate in \textbf{P}, that we usually denote by \texttt{true}.
+For every $P \in \textbf{P}$, we define a \textit{size of predicate} $|P|$ as follows:
+$|P|=1$ if $P\in \textbf{P}_\text{basic}$ (i.e., constant size), $|P|=|P_1|+|P_2|$ if $P=P_1\cap P_2$, and $|P|=|P'|+1$ if $P=\textbf{E}\backslash P'$. 
+For every $P\in\textbf{P}$, we assume that the time to check if $e\vDash P$ is in $\mathcal{O}(|e|)$.
+
+\paragraph{Complex event logic}
+In this work, we use the \textit{Complex Event Logic} (CEL) implemented in CORE as our basic query language for CER. The syntax of a CEL formula $\varphi$ is given by the grammar:
+%[22] A. Grez, C. Riveros, M. Ugarte, and S. Vansummeren. A formal framework for complex event recognition. ACM Trans. Database Syst., 46(4):16:1–16:49, 2021.
+$$\varphi:= R \mid \varphi \texttt{ AS } X \mid 
+\varphi \texttt{ FILTER } X[P] \mid 
+\varphi \texttt{ OR } \varphi \mid 
+\varphi \texttt{ AND } \varphi \mid 
+\varphi \text{ ; } \varphi \mid 
+\varphi \text{ : } \varphi \mid 
+\varphi+ \mid \varphi \oplus \mid \pi_L(\varphi)$$
+where $R\in\textbf{T}$ is an event type, $X\in\textbf{X}$ is a variable, $P\in\textbf{P}$ is a predicate, and $L\subseteq \textbf{X}$ is a set of variables. 
+Throughout the paper, we use $\varphi \texttt{ FILTER } (X[P] \wedge X'[P'])$ as syntactic sugar for $(\varphi \texttt{ FILTER } X[P])\texttt{ FILTER } X'P'$.
+We define the semantics of a CEL formula $\varphi$ over a stream $\bar{S}$, recursively, as a set of complex events over $\bar{S}$.
+
+\begin{align*}
+    \llbracket R\rrbracket(\bar{S}) &=
+    \{(i,j,\mu) \mid \text{type}(e_i)=R \wedge \mu(R)=\{i\} \wedge \forall X\neq R.\ \mu(X) = \emptyset \} \\
+    \llbracket \varphi \texttt{ AS } X\rrbracket(\bar{S}) &= 
+    \begin{aligned}[t]
+        \{ C \mid\ &\exists C' \in \llbracket \varphi \rrbracket(\bar{S}).\ \text{interval}(C)=\text{interval}(C') \wedge C(X)=\bigcup{_Y} C'(Y)  \\
+        &\wedge \forall Z\neq X.\ C(Z)=C'(Z) \}
+    \end{aligned} \\
+    \llbracket \varphi \texttt{ FILTER } X[P]\rrbracket(\bar{S}) &= 
+    \{C \mid C \in \llbracket\varphi\rrbracket(\bar{S}) \wedge C(X) \vDash P \} \\ 
+    \llbracket \varphi_1 \texttt{ OR } \varphi_2 \rrbracket(\bar{S}) &= \llbracket\varphi_1\rrbracket(\bar{S}) \cup \llbracket\varphi_2\rrbracket(\bar{S}) \\
+    \llbracket \varphi_1 \texttt{ AND } \varphi_2 \rrbracket(\bar{S}) &= \llbracket\varphi_1\rrbracket(\bar{S}) \cap \llbracket\varphi_2\rrbracket(\bar{S}) \\ 
+    \llbracket \varphi_1\ ;\ \varphi_2 \rrbracket(\bar{S}) &= \{C_1 \cup C_2 \mid 
+    C_1 \in \llbracket\varphi_1\rrbracket(\bar{S}) \wedge C_2 \in \llbracket\varphi_2\rrbracket(\bar{S}) \wedge \text{end}(C_1) < \text{start}(C_2) \} \\ 
+    \llbracket \varphi_1\ :\ \varphi_2 \rrbracket(\bar{S}) &= \{C_1 \cup C_2 \mid 
+    C_1 \in \llbracket\varphi_1\rrbracket(\bar{S}) \wedge C_2 \in \llbracket\varphi_2\rrbracket(\bar{S}) \wedge \text{end}(C_1) + 1 = \text{start}(C_2) \} \\ 
+    \llbracket\varphi+\rrbracket(\bar{S}) &= \llbracket\varphi\rrbracket(\bar{S}) \cup \llbracket\varphi\ ;\ \varphi+  \rrbracket(\bar{S}) \\
+    \llbracket\varphi\oplus\rrbracket(\bar{S}) &= \llbracket\varphi\rrbracket(\bar{S}) \cup \llbracket\varphi\ :\ \varphi\oplus \rrbracket(\bar{S}) \\ 
+    \llbracket\pi_L(\varphi)\rrbracket(\bar{S}) &= 
+    \{\pi_L(C) \mid C\in \llbracket\varphi\rrbracket(\bar{S})\}
+\end{align*}
+
+\paragraph{Timed complex event logic}
+We first need to extend each event in a stream with a timestamp to include time constraints. 
+Intuitively, the timestamp of an event models how time passes in the systems when events arrive continuously.
+These timestamps could represent when the event happened, when the event was measured, or when the event arrived in the system.
+In any possible scenario, we assume that these timestamps strictly increase with the arrival of events.
+
+Formally, recall that \textbf{T} is a fixed set of event types, \textbf{A} is a fixed set of attributes names, and \textbf{D} is a fixed set of data values for our events $e:\textbf{A}\rightarrow\textbf{D}$ with types in \textbf{T}.
+A \textit{timed stream} is an (arbitrary long) sequence of pairs: 
+$$\bar{S}=(e_1,t_1)(e_2,t_2)...(e_n,t_n)$$
+where $e_i$ is an event and $t_i\in\mathbb{Q}_{\geq0}$ is its timestamp for every $i\in\bbN$.
+We will usually call a pair $(e_i,t_i)$ a \textit{timed event} where $e_i$ is its event and $t_i$ is its timestamp. 
+Further, we assume that timestamps are strictly increasing, namely, $t_1<t_2<...<t_n$.
+
+Note that, although we could have modeled timestamps with a special attribute ``ts'' such that $e_i$(ts)$=t_i$, we preferred to model them as an additional component (i.e., as $(e_i,t_i)$).
+The reason is that timestamps are first citizens in this framework, and we wanted to clearly distinguish between the data (i.e., the events) and the time, which is constantly increasing.
+
+We define \textit{timed Complex Event Logic} (timed CEL for short) as an extension of CEL with additional operators for managing timestamps in time stream. Specifically, a timed CEL formula $\varphi$ follows the same grammar as a CEL formula where we additionally add the following syntax rules:
+\begin{align*}
+    \varphi\ &{:=} \  \langle\varphi\rangle_I \quad\quad  \text{(time window)}\\
+    &\mid \ \  \varphi\ ;_I \varphi \ \ \ \text{(time non-contiguous sequencing)} \\
+    &\mid \ \ \varphi :_I \varphi \ \ \ \text{(time contiguous sequencing)} \\
+    &\mid \ \ \varphi+_I \ \ \ \ \text{(time non-contiguous iteration)} \\
+    &\mid \ \ \varphi\oplus_I \ \ \ \  \text{(time contiguous iteration)}
+\end{align*}
+where $I$ is an interval over $\mathbb{Q}_{\geq0}$.
+We call the above operators the \textit{time operators} of timed CEL, whereas we call the other standard operators just \textit{CEL operators}.
+The previous syntax extends sequencing and iteration operators in CEL (both in their contiguous and non-contiguous versions) with a corresponding time-variant, where we additionally check a time constraint between complex events. 
+Instead, $\langle\varphi\rangle_I$ is a natural extension of time windows in CER.
+
+Timed CEL is an extension of CEL and, as such, we can naturally extend the semantics of CEL operators from streams to timed streams where we just omit the timestamp of timed events.
+For the time operators of timed CEL, we define their semantics recursively.
+In the sequel, we will use the notation $\sim c$ in timed CEL formulas to specify an interval $I = \{p \in \mathbb{Q}_{\geq0} \mid p\sim c \}$ over $\mathbb{Q}_{\geq0}$ for any $c \in \mathbb{Q}_{\geq0}$ and $\sim\in\{\leq,\geq,<,>,=\}$.
+
+\paragraph{Complex Event Automata (CEA)}
+A CEA is a tuple $\mathcal{A} = (Q, \textbf{P}, \textbf{X}, \Delta, q_0, F)$ where $Q$ is a finite set of states, \textbf{P} is the set of predicates, \textbf{X} is a finite set of variables, $\Delta\subseteq Q\times\textbf{P}\times 2^\textbf{X}\times Q$ is a finite relation (called the transition relation), $q_0\in Q$ is the initial state, and $F$ is the set of final states.
+A \textit{run} $\rho$ \textit{of} $\mathcal{A}$ \textit{over the stream} $\bar{S}=e_1e_2...e_n$ \textit{from position} $i$ \textit{to} $j$ is a sequence:
+
+$$\rho:= p_i \xrightarrow{P_i,L_i} p_{i+1} \xrightarrow{P_{i+1},L_{i+1}} p_{i+2} \xrightarrow{P_{i+2},L_{i+2}} \cdots \xrightarrow{P_j,L_j} p_{j+1}$$
+where $p_i = q_0$, $(p_k,P_k,L_k,p_{k+1})\in\Delta$, and $e_k \vDash P_k$ for all $k\in [i..j]$. 
+We say that the run is \textit{accepting} if $p_{j+1} \in F$. 
+A run $\rho$ from positions $i$ to $j$ like above defines the complex event $C_\rho = (i,j,\mu_\rho)$ such that $\mu_\rho(X) = \{k\in [i..j] \mid X\in L_k \}$ for every $X\in\textbf{X}$. 
+Note that the starting and ending positions $i$, $j$ of the run define the interval of the complex event, and the labels $L_k\subseteq \textbf{X}$ define the mapping $\mu_\rho$ of $C_\rho$. 
+We define the set of all complex events of $\mathcal{A}$ over $\bar{S}$ as:
+$$\llbracket\mathcal{A}\rrbracket(\bar{S}) = \{C_\rho \mid \rho \text{ is an accepting run of } \mathcal{A} \text{ over } \bar{S}  \}$$
+
+A CEA $\mathcal{A} = (Q, \textbf{P}, \textbf{X}, \delta, q_0, F)$ is said to be \textit{deterministic} if $\delta$ is a function subset of the set $Q\times \textbf{P} \times 2^\textbf{X} \rightarrow Q$. We also say that $\mathcal{A}$ is \textit{unambiguous} if, for every complex event $C_\rho \in \llbracket\mathcal{A}\rrbracket(\bar{S})$, there exists exactly one accepting run of $\mathcal{A}$ over $\bar{S}$ that defines $C_\rho$. 

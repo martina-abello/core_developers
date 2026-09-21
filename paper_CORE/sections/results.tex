@@ -1,0 +1,199 @@
+%!TEX root = ../main/main.tex
+
+Given a CEA $\cA = (Q, \mathbf{P}, \mathbf{X}, \Delta, q_0, F)$ and an event $e$, we define the matrix $M_e$ such that
+$$M_e[p,q] = |\{(p,P,L,q)\in\Delta \mid e\vDash P\}|$$
+Then, given a stream $e_i...e_j$, we define $M_{e_i...e_j}$ as
+$$M_{e_i...e_j} = M_{e_i} \cdot ... \cdot M_{e_j}$$
+\begin{lemma}\label{lemma:run_count}
+    $M_{e_i...e_j}[p,q]$ is the number of runs from $p$ to $q$ of $\cA$ over $e_i...e_j$.
+\end{lemma}
+
+\begin{proof} By induction on the length $L = j - i + 1$ of the stream.
+
+\noindent\emph{Base case:} $L = 1 \longleftrightarrow i = j$.
+
+    By definition, $M_{e_i}[p,q]=|\{(p,P,L,q)\in\Delta \mid e_i\vDash P\}|$. Each transition $(p,P,L,q)$ activated by the event $e_i$ corresponds to a run of $\cA$ that starts in state $p$, consumes $e_i$, and ends in state $q$. Therefore, $M_{e_i}[p,q]$ counts exactly the number of runs from $p$ to $q$ of $\cA$ over $e_i$.  
+    
+\noindent\emph{Inductive step:} Suppose the property holds for every $M_{e_i...e_j}$ such that $j - i + 1 < L$. Consider $M_{e_i...e_j}$ such that $j - i + 1 = L$.
+    We have: 
+    $$M_{e_i...e_j} = M_{e_i} \cdot M_{e_{i+1}} \cdot ... \cdot M_{e_{j-1}} \cdot M_{e_j} = M_{e_i...e_{j-1}}\cdot M_{e_j}$$
+    Then, by the definition of matrix multiplication, 
+    $$M_{e_i...e_j}[p,q] = \sum_{r\in Q} M_{e_i...e_{j-1}}[p,r]\cdot M_{e_j}[r,q]$$
+
+    By the inductive hypothesis, $M_{e_i...e_{j-1}}[p,r]$ corresponds to the number of runs from $p$ to $q$ of $\cA$ over $e_i...e_{j-1}$, and by the base case, $M_{e_j}[r,q]$ is the number of runs from $r$ to $q$ of $\cA$ over $e_j$.
+    Therefore, the product of these two values corresponds exactly to the number of possible runs from $p$ to $q$ of $\cA$ over the stream $e_i...e_j$; each run of length $L$ can be decomposed into a run of length $L - 1$ from $p$ to some state $r$ over $e_i...e_{j-1}$ followed by a run from that state $r$ to $q$ over $e_j$.
+    Hence, $$M_{e_i...e_j}[p,q] = \text{number of runs from  $p$ to $q$ of $\cA$ over } e_i...e_j$$
+
+\end{proof}
+
+\begin{lemma}\label{lemma:output_count}
+    If $\cA$ is unambiguous, then $M_{e_i...e_j}[p,q]$ is the number of outputs of the runs from $p$ to $q$ of $\cA$ over $e_i...e_j$. 
+\end{lemma}
+
+\begin{proof}
+Since $\cA$ is a unambiguous CEA, each output of $\cA$ over $e_i...e_j$ is produced by one, and only one run. Hence, the number of runs equals the number of outputs.
+
+Thus, by the previous proof, $$M_{e_i...e_j}[p,q] = \text{number of outputs of the runs from $p$ to $q$ of $\cA$ over } e_i...e_j$$
+\end{proof}
+
+We assume that, for every transition $(p, P, L, q) \in \Delta$, we have $q \neq q_0$. Then, given an event $e$, we define the matrix $M_e^*$ as
+$$M_e^* = N_0 + M_e$$
+where $N_0$ is defined by
+\[
+N_0[p,q] = \begin{cases}
+    1 & \text{if } p=q = q_0 \\
+    0 & \text{otherwise}
+\end{cases}
+\]
+%\martina{The matrix N_0 adds a self-loop in the initial state q_0 that allows the automaton to “stay” there without taking any actual transition.}
+Then, given a stream $e_i...e_j$, we define $M_{e_i...e_j}^*$ as
+$$M_{e_i...e_j}^* = M_{e_i}^* \cdot ... \cdot M_{e_j}^*$$
+
+\begin{lemma}\label{lemma:equal_outside_initial}
+    $M^*_{e_{j-w+1}\dots e_j}[p,q] = M_{e_{j-w+1}\dots e_j}[p,q]$ for all $p\neq q_0$.
+\end{lemma}
+\begin{proof}
+By induction on length $w$.
+
+\noindent\emph{Base case:} $w = 1 \longleftrightarrow j - w + 1 = j$.
+By definition, $M^*_{e_j}[p,q] = N_0[p,q] + M_{e_j}[p,q]$. If $p\neq q_0$, then $N_0[p,q]=0$. Therefore, $$M^*_{e_j}[p,q] = M_{e_j}[p,q]$$
+
+\noindent\emph{Inductive step:} Assume that for some $w\geq 1$, when $p\neq q_0$, then
+    \[
+    M^*_{e_{j - w + 1}\dots e_j}[p,q] = M_{e_{j - w + 1}\dots e_j}[p,q] 
+    \]
+Consider window size $w+1$. By definition, $$M^*_{e_{j-w}\dots e_j} = M^*_{e_{j-w}} \cdot M^*_{e_{j-w + 1}\dots e_j} $$
+Let $p\neq q_0$. By matrix multiplication, 
+$$M^*_{e_{j-w}\dots e_j}[p,q] = \sum_{r\in Q} M^*_{e_{j-w}}[p, r] \cdot M^*_{e_{j-w + 1}\dots e_j}[r, q] $$
+By base case, $M^*_{e_{j-w}}[p, r] = M_{e_{j-w}}[p, r]$. Then, under the assumption that there are no transitions to $q_0$ in $\Delta$, we have $M_{e_{j-w}}[p, q_0] = 0$. Therefore,
+$$M^*_{e_{j-w}\dots e_j}[p,q] = \sum_{r\neq q_0} M_{e_{j-w}}[p, r] \cdot M^*_{e_{j-w + 1}\dots e_j}[r, q] $$
+By inductive hypotheses:
+$$M^*_{e_{j-w}\dots e_j}[p,q] = \sum_{r\neq q_0} M_{e_{j-w}}[p, r] \cdot M_{e_{j-w + 1}\dots e_j}[r, q] $$
+Adding $0 = M_{e_{j-w}}[p, q_0] \cdot M_{e_{j-w + 1}\dots e_j}[q_0, q]$, we have
+$$M^*_{e_{j-w}\dots e_j}[p,q] = \sum_{r \in Q} M_{e_{j-w}}[p,r] \cdot M_{e_{j-w+1}\dots e_j}[r,q] = M_{e_{j-w}\dots e_j}[p,q]$$    
+\end{proof}
+
+\begin{theorem}
+For all unambiguous CEA $\cA= (Q, \textbf{P}, \textbf{X}, \Delta, q_0, F)$ and for all stream $S=e_1...e_n$, let $\llbracket\cA\rrbracket_{j}^{w}(S)$ be such that
+$$\llbracket\cA\rrbracket_{j}^w(S) =
+\{ C\in \llbracket\cA\rrbracket(S) \mid end(C) = j \wedge end(C) + 1 - start(C) \leq w \}$$
+that is, the set of complex events over the stream $S$ to position $j$ with a length at most $w$.
+%to position j === stop after reading e_j
+Then,
+$$|\llbracket\cA\rrbracket_{j}^w(S)| = \sum_{q\in F} M^*_{e_{j - w + 1}\dots e_j}[q_0,q] $$
+\end{theorem}
+
+\begin{proof}
+By induction on the maximum length $w$ of the complex event.
+
+\noindent \emph{Base case}: $w = 1 \longleftrightarrow j - w + 1 = j$.
+
+    By definition, a complex event in $\llbracket\cA\rrbracket_{j}^1(S)$ corresponds to an accepting run of $\cA$ over the stream $S$ such that it ends after reading $e_j$ and has length at most $1$. Thus, the number of such complex events is exactly the number of accepting transitions from $q_0$ to some $q\in F$ enabled by $e_j$.    
+
+    Since we assume no transition in $\Delta$ leads to the state $q_0$, $q_0\notin F$, and so we have that $N_0[q_0,q] = 0$ for $q\in F$. 
+    Therefore, for all $q \in F$:
+    \[
+    M^*_{e_j}[q_0,q] = N_0[q_0,q] + M_{e_j}[q_0,q] = M_{e_j}[q_0,q] 
+    \]
+    And thus, 
+    $$\sum_{q\in F} M^*_{e_j}[q_0,q] = \sum_{q\in F} M_{e_j}[q_0,q]$$
+    By Lemma~\ref{lemma:run_count}, for all $q\in F$, $M_{e_j}[q_0,q]$ is the number of runs from the initial state $q_0$ to the accepting state $q$ of $\cA$ over $e_j$, that is, the number of accepting runs over $e_j$ that end in the state $q$. 
+    Consequently, by Lemma~\ref{lemma:output_count} the above sum corresponds to the total number of accepting runs of $\cA$ over $e_j$.
+    We can conclude that 
+    $$|\llbracket\cA\rrbracket_{j}^1(S)| = \sum_{q\in F} M^*_{e_j}[q_0,q]$$
+    
+\noindent \emph{Inductive step}: Assume that for some $w\geq 1$,
+\[
+|\llbracket\cA\rrbracket_{j}^w(S)| = \sum_{q\in F} M^*_{e_{j - w + 1}\dots e_j}[q_0,q].
+\]
+Consider window size $w+1$.
+By definition, $$M^*_{e_{j-w}\dots e_j} = M^*_{e_{j-w}} \cdot M^*_{e_{j-w + 1}\dots e_j} $$
+Let $q\in F$. By matrix multiplication, 
+$$M^*_{e_{j-w}\dots e_j}[q_0,q] = \sum_{p\in Q} M^*_{e_{j-w}}[q_0, p] \cdot M^*_{e_{j-w + 1}\dots e_j}[p, q] $$
+We can separate this sum by $p = q_0$ and $p\neq q_0$:
+$$M^*_{e_{j-w}\dots e_j}[q_0,q] = M^*_{e_{j-w}}[q_0, q_0] \cdot M^*_{e_{j-w + 1}\dots e_j}[q_0, q] + \sum_{p\neq q_0} M^*_{e_{j-w}}[q_0, p] \cdot M^*_{e_{j-w+1}\dots e_j}[p,q]$$
+By definition, 
+$N_0[q_0,q_0]=1$, and since there are no transitions to $q_0$ in $\Delta$, $M_{e_{j-w}}[q_0,q_0]=0$. Hence, $M^*_{e_{j-w}}[q_0, q_0] = 1$. 
+
+On the other hand, when $p\neq q_0$, $N_0[q_0,p] = 0$, so $M^*_{e_{j-w}}[q_0, p] = M_{e_{j-w}}[q_0, p]$, and by Lemma~\ref{lemma:equal_outside_initial}, $M^*_{e_{j-w + 1}\dots e_j}[p, q] = M_{e_{j-w + 1}\dots e_j}[p, q]$ for all $p\neq q_0$.
+
+Consequently, we have that
+$$
+\begin{array}{rcl}
+   M^*_{e_{j-w}\dots e_j}[q_0,q] & = & M^*_{e_{j-w + 1}\dots e_j}[q_0, q] + \sum_{p\neq q_0} M_{e_{j-w}}[q_0,p] \cdot M_{e_{j-w + 1}\dots e_j}[p, q] \\
+   & = &  M^*_{e_{j-w + 1}\dots e_j}[q_0, q] + M_{e_{j-w}\dots e_j}[q_0,q]
+\end{array}$$
+By summing over all final states $q\in F$ we get that:
+$$\sum_{q\in F} M^*_{e_{j-w}\dots e_j}[q_0,q] = \sum_{q\in F}M^*_{e_{j-w + 1}\dots e_j}[q_0, q] + \sum_{q\in F}M_{e_{j-w}\dots e_j}[q_0,q]$$
+By inductive hypotheses, $\sum_{q\in F}M^*_{e_{j-w + 1}\dots e_j}[q_0, q]$ corresponds to $|\llbracket\cA\rrbracket_{j}^w(S)|$, that is, the number of complex events over $S$ to position $j$ with length at most $w$. 
+Meanwhile, $\sum_{q\in F}M_{e_{j-w}\dots e_j}[q_0,q]$ is the number of complex events over $S$ to position $j$ with length \textit{exactly} $w + 1$.
+Therefore, the sum of the two is precisely the number of complex events ending at $j$ with length at most $w+1$, and so, 
+$$|\llbracket\cA\rrbracket_{j}^{w+1}(S)| = \sum_{q\in F} M^*_{e_{j - w}\dots e_j}[q_0,q]$$
+\end{proof}
+
+\martina{New definitions}
+
+Let $\mathscr{L} = \{L \mid (p,P,L,q)\in\Delta\}$. We define: 
+$$M_{e}^{det}[S_1,S_2] =  \sum_{L\in\mathscr{L}} [S_2 = \Delta^{det}(S_1,e,L)] $$
+
+%\martina{In any given instant/event/window $[1, i]$?}
+$$\vec{v}_0[S] = \begin{cases}
+    1 & \text{if } S = I \\
+    0 & \text{otherwise}
+\end{cases}$$
+$$\vec{v}_{k,l} = \vec{v}_0 \cdot \prod_{j=k}^{l-1} M_{e_j}^{det} $$
+for $k \in \{1,\dots,l-1\}$, and
+$$\vec{v}_{l,l} = \vec{v}_0$$
+
+Active events:
+%$$A_{e_i} = \{S\mid \exists j.\ \vec{v_j}[S] \neq 0\}$$
+%\martina{Could be $j\in[k,l]$? To allow $\vec{v}_{l,l} = \vec{v}_0 \neq 0$ (if $S = I$) as an option.}
+$$A_{k,l} = \{S\mid \exists j\in[k,l].\ \vec{v}_{j,l}[S] \neq 0\}$$
+Let $w: \mathbb{N}\rightarrow\mathbb{N}$ be such that, given a stream $e_1\dots e_n$, for all $i\in[1,n-1]$ it holds that $w(i + 1) - 1 \leq w(i) $. We define the following matrix:
+$$N_{e_i}[S,S'] = \begin{cases}
+    M_{e_i}^{det}[S, S'] & \text{if } S \in A_{i - w(i),i} \\
+    0 & \text{otherwise}
+\end{cases}$$
+
+\begin{lemma}\label{lemma:m_n_equivalence}
+Let $e_1\dots e_n$ be a stream.
+    $\forall l\leq n$, $\forall k\in[l-w(l), l]$,
+    $$ \vec{v}_{0}\cdot \prod_{j=k}^{l} M_{e_j}^{det} = \vec{v}_{0} \cdot \prod_{j=k}^{l} N_{e_j} $$
+\end{lemma}
+
+\begin{proof}
+
+By induction on $|l-k|$.
+
+\noindent\emph{Base case:} $|l-k| = 0$.
+
+We have that $k = l$ and, by definition of ${v_0}$, we know that
+$$({v_0}\cdot M_{e_l}^{det})[S] = M_{e_l}^{det}[I, S] \ \text{ and }\ ({v_0}\cdot N_{e_l})[S] = N_{e_l}[I, S]$$
+
+Since $v_{l,l}[I] = {v_0}[I] \neq 0$, we have that $I \in A_{l-w(l),l}$. 
+Then, $N_{e_l}[I,S] = M_{e_l}^{det}[I,S]$ for every $S$, and so 
+$${v_0}\cdot M_{e_l}^{det} = {v_0}\cdot N_{e_l}$$
+
+\noindent\emph{Inductive step:} 
+Assume that, for some $l\leq n$ and $k\in[l-w(l),l]$, for every $l'\leq n$, $k\in[l'-w(l'),l']$ such that $|l'-k'|<|l-k|$, 
+$$v_0\cdot \prod_{j=k'}^{l'} M_{e_j}^{det} = v_0\cdot \prod_{j=k'}^{l'} N_{e_j} $$
+
+As such, we have that
+$$ v_0\cdot \prod_{j=k}^{l} N_{e_j} = \big( v_0\cdot  \prod_{j=k}^{l-1} N_{e_j}\big) \cdot N_{e_l} = \big( v_0\cdot  \prod_{j=k}^{l-1} M_{e_j}^{det}\big) \cdot N_{e_l} = v_{k,l} \cdot N_{e_l} $$
+
+By matrix multiplication,
+$$(v_{k,l}\cdot N_{e_l})[S] = \sum_{S'\in 2^{Q}} v_{k,l}[S']\cdot N_{e_l}[S', S] =  \sum_{A\in 2^{Q}:v_{k,l}[A]\neq 0} v_{k,l}[A]\cdot N_{e_l}[A, S]$$
+%which can be further [refined and expressed?] as
+%$$(v_{k,l}\cdot N_{e_i})[S] = \sum_{A\in 2^{Q}:v_{k,l}[A]\neq 0} v_{k,l}[A]\cdot N_{e_i}[A, S]$$
+
+
+If $v_{k,l}[A]\neq 0$, since $k\in[l-w(l),l]$, then $A\in A_{l-w(l),l}$, and so by definition $N_{e_l}[A, S] = M_{e_l}^{det}[A,S]$. Therefore,
+$$(v_{k,l}\cdot N_{e_l})[S] = \sum_{A\in 2^{Q}:v_{k,l}[A]\neq 0} v_{k,l}[A]\cdot M_{e_l}[A, S] = \sum_{S'\in 2^{Q}} v_{k,l}[S']\cdot M_{e_l}^{det}[S', S]$$
+
+We have that $(v_{k,l}\cdot N_{e_l})[S] = (v_{k,l}\cdot M_{e_l}^{det})[S]$ for every $S\in 2^Q$. Hence,
+$$v_{k,l}\cdot M_{e_l}^{det} = v_{k,l}\cdot N_{e_l}$$
+$$\big( v_0\cdot  \prod_{j=k}^{l-1} M_{e_j}^{det}\big)\cdot M_{e_l}^{det} = \big( v_0\cdot  \prod_{j=k}^{l-1} N_{e_j}\big)\cdot N_{e_l}$$
+$$v_0\cdot \prod_{j=k}^{l} M_{e_j}^{det} = v_0\cdot \prod_{j=k}^{l} N_{e_j} $$
+
+    
+\end{proof}
