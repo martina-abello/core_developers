@@ -195,5 +195,25 @@ $$v_{k,l}\cdot M_{e_l}^{det} = v_{k,l}\cdot N_{e_l}$$
 $$\big( v_0\cdot  \prod_{j=k}^{l-1} M_{e_j}^{det}\big)\cdot M_{e_l}^{det} = \big( v_0\cdot  \prod_{j=k}^{l-1} N_{e_j}\big)\cdot N_{e_l}$$
 $$v_0\cdot \prod_{j=k}^{l} M_{e_j}^{det} = v_0\cdot \prod_{j=k}^{l} N_{e_j} $$
 
+Our challenge now is to maintain a data structure \verb|S| with the following methods:
+\begin{itemize}
+    \item \verb|S.interval()|: returns the current interval $[k,l]$.
+    \item \verb|S.init()|: initializes \verb|S| such that \verb|S.interval()| returns $[0,0]$.
+    \item \verb|S.insert(e)|: inserts the event $e$ at the end of the current window.
+    \begin{itemize}
+        \item If \verb|S.interval()| returns $[k,l]$, then after executing \verb|S.insert(e)|, it should return $[k,l+1]$.
+    \end{itemize}
+    \item \verb|S.move(x)|: for $x\leq|l-k|$, moves the start of the current window $x$ steps to the right.
+    \begin{itemize}
+        \item If \verb|S.interval()| returns $[k,l]$, then after executing \verb|S.move(x)|, it should return $[k+x,l]$.
+    \end{itemize}
+    \item \verb|S.states|: corresponds to $A_{k,l}$, for $[k,l]$ the current interval.    
+\end{itemize}
+
+Finally, given a stream $e_1\dots e_l$ and $S\in 2^Q$, we define
+$$max-start(S) = max\{j \mid \exists \text{ execution of }\cA^{det} \text{ from }j\text{ to }l \text{ that ends in }S \}$$
+$$H_l:\ S \rightarrow max-start(S) \neq -\infty$$
+
+
     
 \end{proof}
