@@ -1,3 +1,4 @@
+% !TeX spellcheck = en_GB
 %!TEX root = ../main/main.tex
 
 Given a CEA $\cA = (Q, \mathbf{P}, \mathbf{X}, \Delta, q_0, F)$ and an event $e$, we define the matrix $M_e$ such that
@@ -148,13 +149,16 @@ $$\vec{v}_{l,l} = \vec{v}_0$$
 Active events:
 %$$A_{e_i} = \{S\mid \exists j.\ \vec{v_j}[S] \neq 0\}$$
 %\martina{Could be $j\in[k,l]$? To allow $\vec{v}_{l,l} = \vec{v}_0 \neq 0$ (if $S = I$) as an option.}
-$$A_{k,l} = \{S\mid \exists j\in[k,l].\ \vec{v}_{j,l}[S] \neq 0\}$$
-Let $w: \mathbb{N}\rightarrow\mathbb{N}$ be such that, given a stream $e_1\dots e_n$, for all $i\in[1,n-1]$ it holds that $w(i + 1) - 1 \leq w(i) $. We define the following matrix:
+\[
+A_{k,l} = \{S\mid \exists j\in[k,l].\ \vec{v}_{j,l}[S] \neq 0\}
+\]
+Fix a window function $w: \bbN_{\geq 1}\rightarrow \bbN_{\geq 1}$ such that, for every $i \in \bbN_{\geq 1}$, $w(i)$ is the size of a \emph{window} at position $i$ in the stream. In particular, given a stream $e_1\dots e_n$, we assume that $w(i) > 0$, and $w(i + 1) - 1 \leq w(i)$ for all $i\in[1,n-1]$ . We define the following matrix:
 $$N_{e_i}[S,S'] = \begin{cases}
-    M_{e_i}^{det}[S, S'] & \text{if } S \in A_{i - w(i),i} \\
+    M_{e_i}^{det}[S, S'] & \text{if } S \in A_{i - w(i)+1,i} \\
     0 & \text{otherwise}
 \end{cases}$$
 
+\cristian{Revisar el +1 en todas las ventanas.}
 \begin{lemma}\label{lemma:m_n_equivalence}
 Let $e_1\dots e_n$ be a stream.
     $\forall l\leq n$, $\forall k\in[l-w(l), l]$,
@@ -195,25 +199,25 @@ $$v_{k,l}\cdot M_{e_l}^{det} = v_{k,l}\cdot N_{e_l}$$
 $$\big( v_0\cdot  \prod_{j=k}^{l-1} M_{e_j}^{det}\big)\cdot M_{e_l}^{det} = \big( v_0\cdot  \prod_{j=k}^{l-1} N_{e_j}\big)\cdot N_{e_l}$$
 $$v_0\cdot \prod_{j=k}^{l} M_{e_j}^{det} = v_0\cdot \prod_{j=k}^{l} N_{e_j} $$
 
+
+
+\end{proof}
+
 Our challenge now is to maintain a data structure \verb|S| with the following methods:
 \begin{itemize}
-    \item \verb|S.interval()|: returns the current interval $[k,l]$.
-    \item \verb|S.init()|: initializes \verb|S| such that \verb|S.interval()| returns $[0,0]$.
-    \item \verb|S.insert(e)|: inserts the event $e$ at the end of the current window.
-    \begin{itemize}
-        \item If \verb|S.interval()| returns $[k,l]$, then after executing \verb|S.insert(e)|, it should return $[k,l+1]$.
-    \end{itemize}
-    \item \verb|S.move(x)|: for $x\leq|l-k|$, moves the start of the current window $x$ steps to the right.
-    \begin{itemize}
-        \item If \verb|S.interval()| returns $[k,l]$, then after executing \verb|S.move(x)|, it should return $[k+x,l]$.
-    \end{itemize}
-    \item \verb|S.states|: corresponds to $A_{k,l}$, for $[k,l]$ the current interval.    
+	\item \verb|S.interval()|: returns the current interval $[k,l]$.
+	\item \verb|S.init()|: initializes \verb|S| such that \verb|S.interval()| returns $[0,0]$.
+	\item \verb|S.insert(e)|: inserts the event $e$ at the end of the current window.
+	\begin{itemize}
+		\item If \verb|S.interval()| returns $[k,l]$, then after executing \verb|S.insert(e)|, it should return $[k,l+1]$.
+	\end{itemize}
+	\item \verb|S.move(x)|: for $x\leq|l-k|$, moves the start of the current window $x$ steps to the right.
+	\begin{itemize}
+		\item If \verb|S.interval()| returns $[k,l]$, then after executing \verb|S.move(x)|, it should return $[k+x,l]$.
+	\end{itemize}
+	\item \verb|S.states|: corresponds to $A_{k,l}$, for $[k,l]$ the current interval.    
 \end{itemize}
 
 Finally, given a stream $e_1\dots e_l$ and $S\in 2^Q$, we define
 $$max-start(S) = max\{j \mid \exists \text{ execution of }\cA^{det} \text{ from }j\text{ to }l \text{ that ends in }S \}$$
 $$H_l:\ S \rightarrow max-start(S) \neq -\infty$$
-
-
-    
-\end{proof}
