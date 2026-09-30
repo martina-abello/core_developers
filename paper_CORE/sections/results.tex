@@ -158,10 +158,9 @@ $$N_{e_i}[S,S'] = \begin{cases}
     0 & \text{otherwise}
 \end{cases}$$
 
-\cristian{Revisar el +1 en todas las ventanas.}
 \begin{lemma}\label{lemma:m_n_equivalence}
 Let $e_1\dots e_n$ be a stream.
-    $\forall l\leq n$, $\forall k\in[l-w(l), l]$,
+    $\forall l\leq n$, $\forall k\in[l-w(l)+1, l]$,
     $$ \vec{v}_{0}\cdot \prod_{j=k}^{l} M_{e_j}^{det} = \vec{v}_{0} \cdot \prod_{j=k}^{l} N_{e_j} $$
 \end{lemma}
 
@@ -174,12 +173,12 @@ By induction on $|l-k|$.
 We have that $k = l$ and, by definition of ${v_0}$, we know that
 $$({v_0}\cdot M_{e_l}^{det})[S] = M_{e_l}^{det}[I, S] \ \text{ and }\ ({v_0}\cdot N_{e_l})[S] = N_{e_l}[I, S]$$
 
-Since $v_{l,l}[I] = {v_0}[I] \neq 0$, we have that $I \in A_{l-w(l),l}$. 
+Since $v_{l,l}[I] = {v_0}[I] \neq 0$, we have that $I \in A_{l-w(l)+1,l}$. 
 Then, $N_{e_l}[I,S] = M_{e_l}^{det}[I,S]$ for every $S$, and so 
 $${v_0}\cdot M_{e_l}^{det} = {v_0}\cdot N_{e_l}$$
 
 \noindent\emph{Inductive step:} 
-Assume that, for some $l\leq n$ and $k\in[l-w(l),l]$, for every $l'\leq n$, $k\in[l'-w(l'),l']$ such that $|l'-k'|<|l-k|$, 
+Assume that, for some $l\leq n$ and $k\in[l-w(l)+1,l]$, for every $l'\leq n$, $k\in[l'-w(l')+1,l']$ such that $|l'-k'|<|l-k|$, 
 $$v_0\cdot \prod_{j=k'}^{l'} M_{e_j}^{det} = v_0\cdot \prod_{j=k'}^{l'} N_{e_j} $$
 
 As such, we have that
@@ -191,7 +190,7 @@ $$(v_{k,l}\cdot N_{e_l})[S] = \sum_{S'\in 2^{Q}} v_{k,l}[S']\cdot N_{e_l}[S', S]
 %$$(v_{k,l}\cdot N_{e_i})[S] = \sum_{A\in 2^{Q}:v_{k,l}[A]\neq 0} v_{k,l}[A]\cdot N_{e_i}[A, S]$$
 
 
-If $v_{k,l}[A]\neq 0$, since $k\in[l-w(l),l]$, then $A\in A_{l-w(l),l}$, and so by definition $N_{e_l}[A, S] = M_{e_l}^{det}[A,S]$. Therefore,
+If $v_{k,l}[A]\neq 0$, since $k\in[l-w(l)+1,l]$, then $A\in A_{l-w(l)+1,l}$, and so by definition $N_{e_l}[A, S] = M_{e_l}^{det}[A,S]$. Therefore,
 $$(v_{k,l}\cdot N_{e_l})[S] = \sum_{A\in 2^{Q}:v_{k,l}[A]\neq 0} v_{k,l}[A]\cdot M_{e_l}[A, S] = \sum_{S'\in 2^{Q}} v_{k,l}[S']\cdot M_{e_l}^{det}[S', S]$$
 
 We have that $(v_{k,l}\cdot N_{e_l})[S] = (v_{k,l}\cdot M_{e_l}^{det})[S]$ for every $S\in 2^Q$. Hence,
