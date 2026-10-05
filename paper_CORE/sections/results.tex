@@ -217,6 +217,36 @@ Our challenge now is to maintain a data structure \verb|S| with the following me
 	\item \verb|S.states|: corresponds to $A_{k,l}$, for $[k,l]$ the current interval.    
 \end{itemize}
 
-Finally, given a stream $e_1\dots e_l$ and $S\in 2^Q$, we define
-$$max-start(S) = max\{j \mid \exists \text{ execution of }\cA^{det} \text{ from }j\text{ to }l \text{ that ends in }S \}$$
-$$H_l:\ S \rightarrow max-start(S) \neq -\infty$$
+\martina{$S\in A_{k,l}$?}
+Given the current window $[k,l]$ and $S\in 2^Q$, we define
+$$max-start_{k,l}(S) = max\{j \in [k,l] \mid \exists \text{ execution of }\cA^{det} \text{ from }j\text{ to }l \text{ that ends in }S \}$$
+%$$H_l:\ S \rightarrow max-start_{k,l}(S) \neq -\infty$$
+Then, we define the dictionary $\mathds{A}: A_{k,l} \rightarrow \bbN$ such that, for all $S\in A_{k,l}$,
+$$ \mathds{A}[S] = max-start_{k,l}(S) \neq -\infty $$
+
+\begin{algorithm}
+\caption{$\mathds{A}.interval()$}
+\begin{algorithmic}[1]
+\State $X \gets x$
+\end{algorithmic}
+\end{algorithm}
+
+%\begin{algorithmic}
+%\Require $n \geq 0$
+%\Ensure $y = x^n$
+%\State $X \gets x$
+%\While{$N \neq 0$}
+%\If{$N$ is even}
+%    \State $X \gets X \times X$
+%    \State $N \gets \frac{N}{2}$  \Comment{This is a comment}
+%\EndIf
+%\EndWhile
+%\end{algorithmic}
+
+
+
+
+
+
+
+
