@@ -227,7 +227,15 @@ $$ \mathds{A}[S] = max-start_{k,l}(S) \neq -\infty $$
 \begin{algorithm}
 \caption{$\mathds{A}.interval()$}
 \begin{algorithmic}[1]
-\State $X \gets x$
+\State  \Return $\mathds{A}.start, \mathds{A}.end$	\Comment{Should return $k, l$}
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+\caption{$\mathds{A}.init()$}
+\begin{algorithmic}[1]
+\State $\mathds{A}.start \gets 0$
+\State $\mathds{A}.end \gets 0$
 \end{algorithmic}
 \end{algorithm}
 
