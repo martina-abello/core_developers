@@ -197,61 +197,87 @@ We have that $(v_{k,l}\cdot N_{e_l})[S] = (v_{k,l}\cdot M_{e_l}^{det})[S]$ for e
 $$v_{k,l}\cdot M_{e_l}^{det} = v_{k,l}\cdot N_{e_l}$$
 $$\big( v_0\cdot  \prod_{j=k}^{l-1} M_{e_j}^{det}\big)\cdot M_{e_l}^{det} = \big( v_0\cdot  \prod_{j=k}^{l-1} N_{e_j}\big)\cdot N_{e_l}$$
 $$v_0\cdot \prod_{j=k}^{l} M_{e_j}^{det} = v_0\cdot \prod_{j=k}^{l} N_{e_j} $$
-
-
-
 \end{proof}
 
-Our challenge now is to maintain a data structure \verb|S| with the following methods:
+\newcommand{\DS}{\texttt{DS}}
+
+Our challenge now is to maintain a data structure \DS\ with the following methods and attributes:
 \begin{itemize}
-	\item \verb|S.interval()|: returns the current interval $[k,l]$.
-	\item \verb|S.init()|: initializes \verb|S| such that \verb|S.interval()| returns $[0,0]$.
-	\item \verb|S.insert(e)|: inserts the event $e$ at the end of the current window.
+	\item \texttt{DS.interval()}: returns the current interval $[k,l]$.
+	\item \texttt{DS.init()}: initializes \DS\ such that \texttt{DS.interval()} returns $[0,0]$.
+	\item \texttt{DS.insert(e)}: inserts the event $e$ at the end of the current window.
 	\begin{itemize}
-		\item If \verb|S.interval()| returns $[k,l]$, then after executing \verb|S.insert(e)|, it should return $[k,l+1]$.
+		\item If \texttt{DS.interval()} returns $[k,l]$, then after executing \texttt{DS.insert(e)}, it should return $[k,l+1]$.
 	\end{itemize}
-	\item \verb|S.move(x)|: for $x\leq|l-k|$, moves the start of the current window $x$ steps to the right.
+	\item \texttt{DS.move(h)}: for $h\leq|l-k|$, moves the start of the current window $h$ steps to the right.
 	\begin{itemize}
-		\item If \verb|S.interval()| returns $[k,l]$, then after executing \verb|S.move(x)|, it should return $[k+x,l]$.
+		\item If \texttt{S.interval()} returns $[k,l]$, then after executing \texttt{DS.move(x)}, it should return $[k+h,l]$.
 	\end{itemize}
-	\item \verb|S.states|: corresponds to $A_{k,l}$, for $[k,l]$ the current interval.    
+	\item \texttt{DS.states}: corresponds to $A_{k,l}$, for $[k,l]$ the current interval.    
 \end{itemize}
 
-\martina{$S\in A_{k,l}$?}
+%\martina{$S\in A_{k,l}$?}
 Given the current window $[k,l]$ and $S\in 2^Q$, we define
 $$max-start_{k,l}(S) = max\{j \in [k,l] \mid \exists \text{ execution of }\cA^{det} \text{ from }j\text{ to }l \text{ that ends in }S \}$$
 %$$H_l:\ S \rightarrow max-start_{k,l}(S) \neq -\infty$$
-Then, we define the dictionary $\mathds{A}: A_{k,l} \rightarrow \bbN$ such that, for all $S\in A_{k,l}$,
+Then, we define the partial function $\mathds{A}: A_{k,l} \rightarrow \bbN$ such that, for all $S\in A_{k,l}$,
 $$ \mathds{A}[S] = max-start_{k,l}(S) \neq -\infty $$
 
 \begin{algorithm}
-\caption{$\mathds{A}.interval()$}
+\caption{{DS.interval()}}
 \begin{algorithmic}[1]
-\State  \Return $\mathds{A}.start, \mathds{A}.end$	\Comment{Should return $k, l$}
+\State  \Return {DS.start, DS.end};	\Comment{Should return $k, l$}
 \end{algorithmic}
 \end{algorithm}
 
 \begin{algorithm}
-\caption{$\mathds{A}.init()$}
+\caption{DS.init()}
 \begin{algorithmic}[1]
-\State $\mathds{A}.start \gets 0$
-\State $\mathds{A}.end \gets 0$
+\State $\mathds{A} \gets \varnothing$;
+\State {DS.start} $\gets 0$; {DS.end} $\gets 0$;
 \end{algorithmic}
 \end{algorithm}
 
-%\begin{algorithmic}
-%\Require $n \geq 0$
-%\Ensure $y = x^n$
-%\State $X \gets x$
-%\While{$N \neq 0$}
-%\If{$N$ is even}
-%    \State $X \gets X \times X$
-%    \State $N \gets \frac{N}{2}$  \Comment{This is a comment}
-%\EndIf
-%\EndWhile
-%\end{algorithmic}
+\begin{algorithm}
+\caption{DS.insert(e)}
+\begin{algorithmic}[1]
+\State $\mathds{A}' \gets \mathds{A}$; $\mathds{A} \gets \varnothing$;
+\State $\mathds{A}'[I] \gets l+1$;
+\ForEach{$S' \in dom(\mathds{A}')$}
+    \ForEach{$(S', P, L, S) \in \Delta^{det}$}
+        \If{$e\vDash P$}
+            \State $\mathds{A}(S) \gets max\{\mathds{A}(S), \mathds{A}'(S')\}$;
+        \EndIf
+    \EndFor
+\EndFor
+\State DS.end $\gets$ DS.end $+\ 1$;
+\end{algorithmic}
+\end{algorithm}
 
+\begin{algorithm}
+\caption{DS.move(h)}
+\begin{algorithmic}[1]
+\Require $h \leq |l-k|$;
+\State $\mathds{A}' \gets \mathds{A}$; $\mathds{A} \gets \varnothing$;
+\ForEach{$S\in dom(\mathds{A}')$}
+    \If{$\mathds{A}'(S) \geq k + h$}
+        \State $\mathds{A}(S) \gets \mathds{A}'(S)$
+    \EndIf
+\EndFor
+\State DS.start $\gets$ DS.start $+\ h$
+\end{algorithmic}
+\end{algorithm}
 
+\begin{algorithm}
+\caption{DS.states}
+\begin{algorithmic}[1]
+\State \Return $dom(\mathds{A})$;
+\end{algorithmic}
+\end{algorithm}
+
+\begin{proof}
+$dom(\mathds{A}) = A_{k,l}$.
+\end{proof}
 
 
 
