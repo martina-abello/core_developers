@@ -223,14 +223,14 @@ $$max-start_{k,l}(S) = max\{j \in [k,l] \mid \exists \text{ execution of }\cA^{d
 Then, we define the partial function $\mathds{A}: A_{k,l} \rightarrow \bbN$ such that, for all $S\in A_{k,l}$,
 $$ \mathds{A}[S] = max-start_{k,l}(S) \neq -\infty $$
 
-\begin{algorithm}
+\begin{algorithm}[H]
 \caption{{DS.interval()}}
 \begin{algorithmic}[1]
 \State  \Return {DS.start, DS.end};	\Comment{Should return $k, l$}
 \end{algorithmic}
 \end{algorithm}
 
-\begin{algorithm}
+\begin{algorithm}[H]
 \caption{DS.init()}
 \begin{algorithmic}[1]
 \State $\mathds{A} \gets \varnothing$;
@@ -238,7 +238,7 @@ $$ \mathds{A}[S] = max-start_{k,l}(S) \neq -\infty $$
 \end{algorithmic}
 \end{algorithm}
 
-\begin{algorithm}
+\begin{algorithm}[H]
 \caption{DS.insert(e)}
 \begin{algorithmic}[1]
 \State $\mathds{A}' \gets \mathds{A}$; $\mathds{A} \gets \varnothing$;
@@ -254,7 +254,7 @@ $$ \mathds{A}[S] = max-start_{k,l}(S) \neq -\infty $$
 \end{algorithmic}
 \end{algorithm}
 
-\begin{algorithm}
+\begin{algorithm}[H]
 \caption{DS.move(h)}
 \begin{algorithmic}[1]
 \Require $h \leq |l-k|$;
@@ -268,7 +268,7 @@ $$ \mathds{A}[S] = max-start_{k,l}(S) \neq -\infty $$
 \end{algorithmic}
 \end{algorithm}
 
-\begin{algorithm}
+\begin{algorithm}[H]
 \caption{DS.states}
 \begin{algorithmic}[1]
 \State \Return $dom(\mathds{A})$;
