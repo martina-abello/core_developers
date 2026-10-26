@@ -148,7 +148,6 @@ $$\vec{v}_{l,l} = \vec{v}_0$$
 
 Active events:
 %$$A_{e_i} = \{S\mid \exists j.\ \vec{v_j}[S] \neq 0\}$$
-%\martina{Could be $j\in[k,l]$? To allow $\vec{v}_{l,l} = \vec{v}_0 \neq 0$ (if $S = I$) as an option.}
 \[
 A_{k,l} = \{S\mid \exists j\in[k,l].\ \vec{v}_{j,l}[S] \neq 0\}
 \]
@@ -200,6 +199,7 @@ $$v_0\cdot \prod_{j=k}^{l} M_{e_j}^{det} = v_0\cdot \prod_{j=k}^{l} N_{e_j} $$
 \end{proof}
 
 \newcommand{\DS}{\texttt{DS}}
+\newcommand{\dsA}{\mathds{A}}
 
 Our challenge now is to maintain a data structure \DS\ with the following methods and attributes:
 \begin{itemize}
@@ -217,11 +217,11 @@ Our challenge now is to maintain a data structure \DS\ with the following method
 \end{itemize}
 
 %\martina{$S\in A_{k,l}$?}
-Given the current window $[k,l]$ and $S\in 2^Q$, we define
+Given the current window $[k,l]$ and $S\in 2^Q$, we define:
 $$max-start_{k,l}(S) = max\{j \in [k,l] \mid \exists \text{ execution of }\cA^{det} \text{ from }j\text{ to }l \text{ that ends in }S \}$$
 %$$H_l:\ S \rightarrow max-start_{k,l}(S) \neq -\infty$$
-Then, we define the partial function $\mathds{A}: A_{k,l} \rightarrow \bbN$ such that, for all $S\in A_{k,l}$,
-$$ \mathds{A}[S] = max-start_{k,l}(S) \neq -\infty $$
+Then, we define the partial function $\dsA: 2^Q \rightarrow \bbN$ such that, for all $S\in A_{k,l}$,
+$$ \dsA[S] = max-start_{k,l}(S) \neq -\infty $$
 
 \begin{algorithm}[H]
 \caption{{DS.interval()}}
@@ -233,7 +233,7 @@ $$ \mathds{A}[S] = max-start_{k,l}(S) \neq -\infty $$
 \begin{algorithm}[H]
 \caption{DS.init()}
 \begin{algorithmic}[1]
-\State $\mathds{A} \gets \varnothing$;
+\State $\dsA \gets \varnothing$;
 \State {DS.start} $\gets 0$; {DS.end} $\gets 0$;
 \end{algorithmic}
 \end{algorithm}
@@ -241,12 +241,12 @@ $$ \mathds{A}[S] = max-start_{k,l}(S) \neq -\infty $$
 \begin{algorithm}[H]
 \caption{DS.insert(e)}
 \begin{algorithmic}[1]
-\State $\mathds{A}' \gets \mathds{A}$; $\mathds{A} \gets \varnothing$;
-\State $\mathds{A}'[I] \gets l+1$;
-\ForEach{$S' \in dom(\mathds{A}')$}
+\State $\dsA' \gets \dsA$; $\dsA \gets \varnothing$;
+\State $\dsA'(I) \gets l+1$;	 \Comment{Should add an $[k,l]\gets$ DS.interval()? }
+\ForEach{$S' \in dom(\dsA')$}
     \ForEach{$(S', P, L, S) \in \Delta^{det}$}
         \If{$e\vDash P$}
-            \State $\mathds{A}(S) \gets max\{\mathds{A}(S), \mathds{A}'(S')\}$;
+            \State $\dsA(S) \gets max\{\dsA(S), \dsA'(S')\}$;
         \EndIf
     \EndFor
 \EndFor
@@ -257,11 +257,11 @@ $$ \mathds{A}[S] = max-start_{k,l}(S) \neq -\infty $$
 \begin{algorithm}[H]
 \caption{DS.move(h)}
 \begin{algorithmic}[1]
-\Require $h \leq |l-k|$;
-\State $\mathds{A}' \gets \mathds{A}$; $\mathds{A} \gets \varnothing$;
-\ForEach{$S\in dom(\mathds{A}')$}
-    \If{$\mathds{A}'(S) \geq k + h$}
-        \State $\mathds{A}(S) \gets \mathds{A}'(S)$
+\Require $h \leq |l-k|$;		\Comment{Should add an $[k,l]\gets$ DS.interval()? }
+\State $\dsA' \gets \dsA$; $\dsA \gets \varnothing$;
+\ForEach{$S\in dom(\dsA')$}
+    \If{$\dsA'(S) \geq k + h$}
+        \State $\dsA(S) \gets \dsA'(S)$
     \EndIf
 \EndFor
 \State DS.start $\gets$ DS.start $+\ h$
@@ -271,13 +271,66 @@ $$ \mathds{A}[S] = max-start_{k,l}(S) \neq -\infty $$
 \begin{algorithm}[H]
 \caption{DS.states}
 \begin{algorithmic}[1]
-\State \Return $dom(\mathds{A})$;
+\State \Return $dom(\dsA)$;
 \end{algorithmic}
 \end{algorithm}
 
-\begin{proof}
-$dom(\mathds{A}) = A_{k,l}$.
+
+\begin{lemma}\label{lemma:dom_A}
+$dom(\dsA) = A_{k,l}$.
+\end{lemma}
+
+\begin{proof} We check case by case.
+
+\begin{itemize}
+
+\item After executing \texttt{DS.init()}, $\dsA$ is empty, and \texttt{DS.interval()} returns $[0,0]$. As $A_{0,0}$ is undefined, the property holds.
+
+\end{itemize}
+
+Now, suppose that \texttt{DS.interval()} returns $[k,l]$ and $dom(\dsA) = A_{k,l}$.
+%A_{k,l} = \{S\mid \exists j\in[k,l].\ \vec{v}_{j,l}[S] \neq 0\}
+
+\begin{itemize}
+
+\item After executing \texttt{DS.insert(e)}, we have that $dom(\dsA)$ now corresponds to all states $S$ such that there exists a transition $(S',P,L,S)\in\Delta^{det}$ with $S' \in A_{k,l}$ and $e\vDash P$, 
+plus the initial state $I$.
+
+For any $S'\in A_{k,l}$,  
+%$\dsA'(S')$ corresponds to $max-start_{k,l}(S')$, that is, the maximum $j\in[k,l]$ such that there exists an execution of $\mathcal{A}^{det}$ from $j$ to $l$ that ends in $S'$. 
+there exists an execution of $\mathcal{A}^{det}$ from $j\in[k,l]$ to $l$ that ends in $S'$. 
+
+Appending the transition from $S'$ to $S$ over $e$ yields an execution from $j$ to $l+1$ that ends in $S$, and so we can conclude that $S\in A_{k,l+1}$. $(\Rightarrow)$
+
+On the other hand, for any $Q\in A_{k,l+1}$, there exists an execution from $j\in[k,l+1]$ to $l+1$, that is, over the stream $e_j\dots e_{l+1}$, that ends in $Q$. We can decompose said stream into the substream $e_j\dots e_l$ and the event $e_{l+1}$. 
+
+Let $Q'$ be the automata's state after the %same 
+execution over the substream $e_j\dots e_l$, and $(Q',P,L,Q)\in\Delta^{det}$ the %original execution's 
+transition such that $e_{l+1}\vDash P$. We have that $Q'\in A_{k,l}$, that is, $Q'\in dom(\dsA')$, and since $e_{l+1} = e$, then $e\vDash P$. Therefore, $Q\in dom(\dsA)$.  $(\Leftarrow)$
+
+We can conclude that $\dsA(S) = A_{k,l+1}$ and, as \texttt{DS.interval()} now returns $[k,l+1]$, the property holds.
+
+\item After executing \texttt{DS.move(h)}, we have that $dom(\dsA)$ now corresponds to all states $S$ such that
+$S\in A_{k,l}$ and $max-start_{k,l}(S) \geq k+h$.
+
+Then, for $S\in dom(\dsA)$, there exists an execution of $\mathcal{A}^{det}$ from $j\in[k+h,l]$ to $l$ that ends in $S$, and so we can conclude that $S\in A_{k+h,l}$.  $(\Rightarrow)$
+
+On the other hand, for any $Q\in A_{k+h,l}$, there exists an execution from $j\in[k+h,l]$ to $l$ that ends in $Q$. As $k\leq k+h$, we have that $j\in[k,l]$, and therefore $Q\in A_{k,l}$, that is, $Q\in dom(\dsA')$. 
+
+Finally, by definition, $\dsA'(Q)\geq k+h$, and so it follows that $Q\in dom(\dsA)$. $(\Leftarrow)$
+
+We can conclude that $\dsA(S) = A_{k+h,l}$ and, as \texttt{DS.interval()} now returns $[k+h,l]$, the property holds.
+
+\end{itemize}
+
 \end{proof}
+
+
+
+\begin{proof}
+DS.insert(e) $\in \mathcal{O}(|A_{k,l}|) $
+\end{proof}
+
 
 
 
