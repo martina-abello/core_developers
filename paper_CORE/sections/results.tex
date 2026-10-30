@@ -325,13 +325,27 @@ We can conclude that $\dsA(S) = A_{k+h,l}$ and, as \texttt{DS.interval()} now re
 
 \end{proof}
 
-
-
 \begin{proof}
-DS.insert(e) $\in \mathcal{O}(|A_{k,l}|) $
+DS.insert(e) $\in \mathcal{O}(|A_{k,l}|) $.
+
+In line $1$, copying $\dsA$ to $\dsA'$ and resetting $\dsA$ costs $\mathcal{O}(|dom(\dsA)|)$.
+
+In lines $3-8$, the outer loop runs $|dom(\dsA)|$ times, while the inner loop runs, at worst, $|\Delta^{det}|$ times. Since the later is a given constant, the entire section costs $\mathcal{O}(|dom(\dsA)|)$.
+
+Finally, lines 2, 5 and 6 are $\mathcal{O}(1)$, as they are one map update, a check and another map update, respectively.
+
+Therefore, DS.insert(e) $\in \mathcal{O}(|dom(\dsA)|) $, and by Lemma 6 we conclude that DS.insert(e) $\in \mathcal{O}(|A_{k,l}|) $.
 \end{proof}
 
+\begin{proof}
+DS.move(h) $\in \mathcal{O}(|A_{k,l}|) $.
 
+In line $1$, copying $\dsA$ to $\dsA'$ and resetting $\dsA$ costs $\mathcal{O}(|dom(\dsA)|)$.
+
+In lines $2-4$, the loop runs $|dom(\dsA)|$ times, while the check in line $3$ and the map update in line $4$ are $\mathcal{O}(1)$.
+
+Therefore, DS.move(h) $\in \mathcal{O}(|dom(\dsA)|) $, and by Lemma 6 we conclude that DS.move(h) $\in \mathcal{O}(|A_{k,l}|) $.
+\end{proof}
 
 
 
